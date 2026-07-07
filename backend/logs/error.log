@@ -1,0 +1,3 @@
+[2026-07-07 16:50:46:5046] [[31merror[39m]: [31mDatabase connection error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017[39m
+[2026-07-08 01:31:53:3153] [[31merror[39m]: [31mDatabase connection error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017[39m
+[2026-07-08 01:35:16:3516] [[31merror[39m]: [31mDatabase connection error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017[39m

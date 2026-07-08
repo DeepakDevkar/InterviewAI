@@ -2,8 +2,13 @@ import axios from 'axios';
 import { store } from '../store/store.js';
 import { logOut, setCredentials } from '../features/auth/authSlice.js';
 
+const getBaseURL = () => {
+  const raw = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+  return raw.endsWith('/api/v1') ? raw : `${raw.replace(/\/$/, '')}/api/v1`;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -35,7 +40,7 @@ api.interceptors.response.use(
       try {
         // Call auth refresh endpoint (HttpOnly cookie will be sent automatically)
         const response = await axios.post(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/auth/refresh`,
+          `${getBaseURL()}/auth/refresh`,
           {},
           { withCredentials: true }
         );

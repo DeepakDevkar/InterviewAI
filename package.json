@@ -1,0 +1,13 @@
+{
+  "name": "interview-ai-monorepo",
+  "version": "1.0.0",
+  "description": "Monorepo root for InterviewAI",
+  "scripts": {
+    "preinstall": "npm install --prefix backend",
+    "build": "echo 'Skipping root build'",
+    "start": "npm start --prefix backend"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

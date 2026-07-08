@@ -54,49 +54,58 @@ export const register = async (req, res, next) => {
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
+    const hasSmtp = process.env.SMTP_USER && process.env.SMTP_USER !== 'mockuser' && process.env.SMTP_USER !== '';
+    const isVerifiedDefault = !hasSmtp; // Auto-verify if SMTP is unconfigured or mock
+
     const newUser = await User.create({
       name,
       email,
       password,
       verificationToken,
       verificationTokenExpires,
-      isVerified: false
+      isVerified: isVerifiedDefault
     });
 
-    // Send Verification Email
-    const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
-    const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
-        <h2 style="color: #4f46e5; text-align: center;">Verify Your Email - InterviewAI</h2>
-        <p>Hi ${name},</p>
-        <p>Thank you for signing up for InterviewAI. Please click the button below to verify your email address and activate your account:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${verificationUrl}" style="background-color: #4f46e5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Verify Email Address</a>
+    let message = 'Account created! Please check your email to verify your account.';
+    
+    if (!hasSmtp) {
+      message = 'Account created and auto-verified successfully! You can now log in.';
+    } else {
+      // Send Verification Email
+      const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
+      const emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+          <h2 style="color: #4f46e5; text-align: center;">Verify Your Email - InterviewAI</h2>
+          <p>Hi ${name},</p>
+          <p>Thank you for signing up for InterviewAI. Please click the button below to verify your email address and activate your account:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}" style="background-color: #4f46e5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Verify Email Address</a>
+          </div>
+          <p>This verification link is valid for 24 hours. If the button above doesn't work, copy and paste the link below into your web browser:</p>
+          <p style="word-break: break-all; color: #64748b;">${verificationUrl}</p>
+          <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+          <p style="font-size: 12px; color: #94a3b8; text-align: center;">If you didn't create an account, you can safely ignore this email.</p>
         </div>
-        <p>This verification link is valid for 24 hours. If the button above doesn't work, copy and paste the link below into your web browser:</p>
-        <p style="word-break: break-all; color: #64748b;">${verificationUrl}</p>
-        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-        <p style="font-size: 12px; color: #94a3b8; text-align: center;">If you didn't create an account, you can safely ignore this email.</p>
-      </div>
-    `;
+      `;
 
-    try {
-      await sendEmail({
-        to: email,
-        subject: 'Verify your email address - InterviewAI',
-        html: emailHtml
-      });
-    } catch (err) {
-      // Clean up token if email fails
-      newUser.verificationToken = undefined;
-      newUser.verificationTokenExpires = undefined;
-      await newUser.save({ validateBeforeSave: false });
-      return next(new AppError('Failed to send verification email. Please try again.', 500));
+      try {
+        await sendEmail({
+          to: email,
+          subject: 'Verify your email address - InterviewAI',
+          html: emailHtml
+        });
+      } catch (err) {
+        // Clean up token if email fails
+        newUser.verificationToken = undefined;
+        newUser.verificationTokenExpires = undefined;
+        await newUser.save({ validateBeforeSave: false });
+        return next(new AppError('Failed to send verification email. Please try again.', 500));
+      }
     }
 
     res.status(201).json({
       status: 'success',
-      message: 'Account created! Please check your email to verify your account.'
+      message
     });
   } catch (error) {
     next(error);

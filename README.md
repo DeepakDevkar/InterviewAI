@@ -10,8 +10,8 @@ InterviewAI is a comprehensive MERN Stack SaaS application designed to help job 
 - **Role**: Full Stack MERN Developer
 - **Portfolio Website**: [deepakdevkar.netlify.app](https://deepakdevkar.netlify.app)
 - **LinkedIn Profile**: [linkedin.com/in/deepakdevkar](https://www.linkedin.com/in/deepakdevkar)
-- **GitHub Profile**: [github.com/placeholder](https://github.com/placeholder)
-- **Email Contact**: placeholder@example.com
+- **GitHub Profile**: [github.com/placeholder](https://github.com/DeepakDevkar)
+
 
 ---
 
